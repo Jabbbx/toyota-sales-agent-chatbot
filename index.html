@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Toyota AI Sales Agent</title>
+  <style>
+    body { font-family: system-ui; background:#f5f7fb; margin:0; }
+    .wrap { max-width: 800px; margin: auto; padding: 16px; }
+    h2 { margin-bottom: 8px; }
+    .chat {
+      background: #fff;
+      border-radius: 12px;
+      padding: 12px;
+      height: 65vh;
+      overflow-y: auto;
+      border: 1px solid #e5e7eb;
+    }
+    .msg { margin: 10px 0; display: flex; }
+    .me { justify-content: flex-end; }
+    .bot { justify-content: flex-start; }
+    .bubble {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      line-height: 1.4;
+      white-space: pre-wrap;
+    }
+    .me .bubble { background: #dbeafe; }
+    .bot .bubble { background: #eef2ff; }
+    .input {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #d1d5db;
+    }
+    button {
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: none;
+      background: #2563eb;
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <h2>Toyota AI Sales Agent</h2>
+  <p>ทดลองคุยกับผู้ช่วยแนะนำรถโตโยต้า</p>
+
+  <div id="chat" class="chat"></div>
+
+  <div class="input">
+    <input id="text" placeholder="พิมพ์ข้อความ..." />
+    <button onclick="send()">ส่ง</button>
+  </div>
+</div>
+
+<script>
+const API_BASE = "https://toyota-sales-agent-api-1039754015088.asia-southeast1.run.app";
+const chat = document.getElementById("chat");
+const text = document.getElementById("text");
+
+function add(role, msg) {
+  const div = document.createElement("div");
+  div.className = "msg " + role;
+  div.innerHTML = `<div class="bubble"></div>`;
+  div.querySelector(".bubble").textContent = msg;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function send() {
+  const message = text.value.trim();
+  if (!message) return;
+  text.value = "";
+
+  add("me", message);
+  add("bot", "กำลังคิด...");
+
+  const res = await fetch(API_BASE + "/chat", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ message })
+  });
+
+  const data = await res.json();
+  chat.lastChild.remove();
+  add("bot", data.reply || "ขออภัย ระบบมีปัญหาชั่วคราว");
+}
+
+add("bot", "สวัสดีค่ะ สนใจรถแบบไหนเป็นพิเศษคะ 😊");
+</script>
+</body>
+</html>
